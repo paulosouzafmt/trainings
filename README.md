@@ -1,2 +1,0 @@
-# trainings
-pasta de treinamentos

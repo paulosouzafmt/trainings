@@ -1,0 +1,17 @@
+# R / Shiny
+.Rhistory
+.RData
+.Rproj.user/
+renv/library/
+renv/python/
+rsconnect/
+
+# uploads / dados gerados
+app/www/uploads/
+data/
+*.sqlite
+*.log
+
+# cache temporário
+tmp/
+.cache/
