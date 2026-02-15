@@ -3,7 +3,7 @@ library(tools)
 
 ui <- fluidPage(
   h3("Upload de foto -> salva em www/uploads"),
-  fileInput("foto", "Selecione uma imagem (png/jpg)", accept = c("image/png","image/jpeg")),
+  fileInput("foto", "Selecione uma imagem - (formato png/jpg)", accept = c("image/png","image/jpeg")),
   textOutput("msg"),
   tags$hr(),
   uiOutput("preview")
