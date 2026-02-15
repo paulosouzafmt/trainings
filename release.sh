@@ -4,16 +4,21 @@ set -euo pipefail
 CONF_FILE="release.conf"
 
 if [[ ! -f "$CONF_FILE" ]]; then
-  echo "Arquivo release.conf não encontrado."
+  echo "Arquivo release.conf não encontrado na raiz do repo."
   exit 1
 fi
 
-# Lê versão atual
+# Exigir working tree limpa
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Você tem alterações não commitadas. Commit/stash antes de criar release."
+  exit 1
+fi
+
+# shellcheck disable=SC1090
 source "$CONF_FILE"
 
-IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-
-# Incrementa PATCH
+# Espera VERSION=X.Y.Z
+IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION:?VERSION não definida no release.conf}"
 PATCH=$((PATCH + 1))
 
 NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
@@ -21,31 +26,26 @@ TIMESTAMP="$(date +%Y.%m.%d.%H%M)"
 NEW_RELEASE="${NEW_VERSION} - ${TIMESTAMP}"
 NEW_TAG="v${NEW_VERSION}"
 
-echo "==> Nova versão: ${NEW_RELEASE}"
+echo "==> Release: ${NEW_RELEASE}"
 
-# Atualiza arquivo conf
+echo "==> Atualizando develop"
+git fetch origin
+git checkout develop
+git pull
+
+echo "==> Atualizando main"
+git checkout main
+git pull
+
+echo "==> Merge develop -> main"
+git merge --no-ff develop -m "chore(release): ${NEW_RELEASE}"
+
+echo "==> Atualizando release.conf"
 cat > "$CONF_FILE" <<EOF
 VERSION=${NEW_VERSION}
 LAST_RELEASE="${NEW_RELEASE}"
 EOF
 
-# Garante que está tudo commitado antes
-if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "Há alterações não commitadas. Commit antes da release."
-  exit 1
-fi
-
-echo "==> Atualizando branches"
-git checkout develop
-git pull origin develop
-
-git checkout main
-git pull origin main
-
-echo "==> Merge develop -> main"
-git merge --no-ff develop -m "chore(release): ${NEW_RELEASE}"
-
-echo "==> Commit do release.conf"
 git add "$CONF_FILE"
 git commit -m "chore: bump version to ${NEW_RELEASE}"
 
@@ -56,5 +56,4 @@ echo "==> Push main + tag"
 git push origin main
 git push origin "${NEW_TAG}"
 
-echo "✅ Release criada com sucesso:"
-echo "   ${NEW_RELEASE}"
+echo "✅ Release criada: ${NEW_RELEASE}"
