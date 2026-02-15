@@ -2,6 +2,7 @@ library(shiny)
 library(tools)
 ## Testando release genérica
 ## Testando release genérica
+## Teste release 5
 ui <- fluidPage(
   h3("Upload de foto -> salva em www/uploads"),
   fileInput("foto", "Selecione uma imagem - (formato png/jpg)", accept = c("image/png","image/jpeg")),
