@@ -15,16 +15,21 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 fi
 
 # shellcheck disable=SC1090
+# shellcheck disable=SC1090
 source "$CONF_FILE"
 
-# Espera VERSION=X.Y.Z
-IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION:?VERSION não definida no release.conf}"
-PATCH=$((PATCH + 1))
+CURRENT_VERSION="${VERSION}"
 
-NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+# Incrementa PATCH corretamente
+NEW_PATCH=$((PATCH + 1))
+
+NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
 TIMESTAMP="$(date +%Y.%m.%d.%H%M)"
 NEW_RELEASE="${NEW_VERSION} - ${TIMESTAMP}"
 NEW_TAG="v${NEW_VERSION}"
+
 
 echo "==> Release: ${NEW_RELEASE}"
 
